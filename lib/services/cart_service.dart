@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../model/Cart/cart_item.dart';
-import '../../model/product.dart';
+import '../model/Cart/cart_item.dart';
+import '../model/product.dart';
 
 class CartService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

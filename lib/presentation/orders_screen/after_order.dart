@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled/core/app_export.dart';
 import 'package:untitled/presentation/cart_screen/cart_screen.dart';
 import 'package:untitled/presentation/orders_screen/my_order_screen.dart';
-import 'package:untitled/services/Database/product_service.dart';
+import 'package:untitled/services/product_service.dart';
 import 'package:untitled/widgets/custom_elevated_button.dart';
 
 import '../../model/product.dart';

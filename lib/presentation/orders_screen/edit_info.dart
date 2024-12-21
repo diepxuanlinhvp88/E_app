@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:untitled/core/app_export.dart';
 import 'package:untitled/model/address_model.dart';
 import 'package:untitled/model/user.dart';
-import 'package:untitled/services/Database/address_service/address_repository.dart';
-import 'package:untitled/services/Database/address_service/address_service.dart';
-import 'package:untitled/services/Database/user_service.dart';
+import 'package:untitled/services/address_service/address_repository.dart';
+import 'package:untitled/services/address_service/address_service.dart';
+import 'package:untitled/services/user_service.dart';
 import 'package:untitled/theme/custom_text_style.dart';
 import 'package:untitled/widgets/custom_elevated_button.dart';
 import 'package:untitled/widgets/custom_text_form_field.dart';
 
 class EditInfo extends StatefulWidget {
-  const EditInfo({super.key, required this.user,});
+  const EditInfo({
+    super.key,
+    required this.user,
+  });
 
   final CustomUser user;
-
 
   @override
   State<EditInfo> createState() => _EditInfoState();
@@ -35,6 +37,8 @@ class _EditInfoState extends State<EditInfo> {
   String? currentWardCode;
   String? currentWardName;
 
+  AddressModel? _address;
+
   late AddressRepository addressRepository;
 
   @override
@@ -44,8 +48,44 @@ class _EditInfoState extends State<EditInfo> {
     _nameController = TextEditingController(text: widget.user.name);
     _phoneController = TextEditingController(text: widget.user.phone);
     addressRepository = AddressRepository();
+    _getCurrentAddress();
 
-    _loadProvinces();
+    // _loadProvinces();
+  }
+
+  Future<void> _getCurrentAddress() async {
+    if (widget.user.addressId != null) {
+      _address = await addressRepository.getAddressById(widget.user.addressId!);
+      print('da có ID địa chỉ');
+      _loadCurrentAddress();
+    } else
+      print('chua có ID địa chỉ');
+  }
+
+  Future<void> _loadCurrentAddress() async {
+    if (_address != null) {
+      setState(() {
+        currentProvinceId = _address!.provinceId;
+        currentProvinceName = _address!.province;
+        currentDistrictId = _address!.districtId;
+        currentDistrictName = _address!.district;
+        currentWardCode = _address!.wardCode;
+        currentWardName = _address!.ward;
+      });
+
+      print('currentProvinceId: $currentProvinceId');
+      print('currentDistrictId: $currentDistrictId');
+      print('currentWardCode: $currentWardCode');
+
+      _loadProvinces();
+      _loadDistricts(currentProvinceId!);
+      _loadWards(currentDistrictId!);
+      print('co _address');
+      print(provinces);
+      print(districts);
+      print(wards);
+    } else
+      print('khong co _address');
   }
 
   Future<void> _loadProvinces() async {
@@ -108,14 +148,15 @@ class _EditInfoState extends State<EditInfo> {
     }
     return DropdownButtonFormField<String>(
       value: currentValue,
-      hint: Text(hintText),
+      hint: Text(hintText,
+          style: CustomTextStyles.labelLargePrimary.copyWith(fontSize: 16)),
       isExpanded: true,
       items: items.map((item) {
         return DropdownMenuItem<String>(
           value: item[valueKey].toString(), // Giá trị lấy ra khi chọn
           child: Text(
             item[displayKey],
-            style: CustomTextStyles.labelLargePrimary.copyWith(fontSize: 14),
+            style: CustomTextStyles.labelLargePrimary.copyWith(fontSize: 16),
           ), // Tên hiển thị
         );
       }).toList(),
@@ -172,7 +213,8 @@ class _EditInfoState extends State<EditInfo> {
               _buildDropdown(
                 currentValue: currentProvinceId,
                 items: provinces,
-                hintText: 'Select Province',
+                hintText:
+                    _address != null ? _address!.province : 'Select Province',
                 displayKey: 'ProvinceName',
                 // Tên hiển thị
                 valueKey: 'ProvinceID',
@@ -188,17 +230,19 @@ class _EditInfoState extends State<EditInfo> {
                 },
               ),
               const SizedBox(height: 10),
-              if (currentProvinceId != null)
+              if (currentProvinceId != null || _address != null)
                 _buildDropdown(
                   currentValue: currentDistrictId,
                   items: districts,
-                  hintText: 'Select District',
+                  hintText:
+                      _address != null ? _address!.district : 'Select District',
                   displayKey: 'DistrictName',
                   // Tên hiển thị
                   valueKey: 'DistrictID',
                   // Giá trị lấy ra
                   onChanged: (value) {
                     setState(() {
+                      currentDistrictId = null;
                       currentDistrictId = value;
                       currentDistrictName = districts!.firstWhere((district) =>
                           district['DistrictID'].toString() ==
@@ -208,23 +252,23 @@ class _EditInfoState extends State<EditInfo> {
                   },
                 ),
               const SizedBox(height: 10),
-              if (currentDistrictId != null)
-                _buildDropdown(
-                  currentValue: currentWardCode,
-                  items: wards,
-                  hintText: 'Select Ward',
-                  displayKey: 'WardName',
-                  // Tên hiển thị
-                  valueKey: 'WardCode',
-                  // Giá trị lấy ra
-                  onChanged: (value) {
-                    setState(() {
-                      currentWardCode = value;
-                      currentWardName = wards!.firstWhere((ward) =>
-                          ward['WardCode'].toString() == value)['WardName'];
-                    });
-                  },
-                ),
+              // if (currentDistrictId != null)
+              _buildDropdown(
+                currentValue: currentWardCode,
+                items: wards,
+                hintText: _address != null ? _address!.ward : 'Select Ward',
+                displayKey: 'WardName',
+                // Tên hiển thị
+                valueKey: 'WardCode',
+                // Giá trị lấy ra
+                onChanged: (value) {
+                  setState(() {
+                    currentWardCode = value;
+                    currentWardName = wards!.firstWhere((ward) =>
+                        ward['WardCode'].toString() == value)['WardName'];
+                  });
+                },
+              ),
               const SizedBox(height: 20),
               CustomElevatedButton(
                 text: 'Update',
@@ -247,7 +291,8 @@ class _EditInfoState extends State<EditInfo> {
                       districtId: currentDistrictId!,
                       wardCode: currentWardCode!,
                     );
-                    addressRepository.createAddressAndLinkToUser(address, widget.user.uid!);
+                    addressRepository.createAddressAndLinkToUser(
+                        address, widget.user.uid!);
                     print('chua co dia chi');
                   } else {
                     AddressModel address = AddressModel(
@@ -259,7 +304,8 @@ class _EditInfoState extends State<EditInfo> {
                       districtId: currentDistrictId!,
                       wardCode: currentWardCode!,
                     );
-                    addressRepository.updateAddress(widget.user.addressId!, address);
+                    addressRepository.updateAddress(
+                        widget.user.addressId!, address);
                   }
 
                   Navigator.pop(context, true);

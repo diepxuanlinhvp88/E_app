@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/app_export.dart';
 import '../../theme/custom_button_style.dart';
 import '../../widgets/custom_elevated_button.dart';
+import '../home_screen/provider/home_screen_provider.dart';
 
 class WelcomeOnboardingScreen extends StatelessWidget {
   const WelcomeOnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<HomeScreenProvider>();
+    provider.loadAllData();
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,

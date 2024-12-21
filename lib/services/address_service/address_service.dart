@@ -55,10 +55,10 @@ class AddressService {
       if (response.statusCode != 200) {
         throw Exception('Failed to fetch district');
       }
-      print('Response body: ${response.body}');
+      // print('Response body: ${response.body}');
       final responseBody = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       final List<dynamic> districtList = responseBody['data'];
-      print(districtList);
+      // print(districtList);
 
       return districtList.map(
         (element) {
@@ -90,7 +90,7 @@ class AddressService {
       // print('Response body: ${response.body}');
       final responseBody = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       final List<dynamic> wardList = responseBody['data'];
-      print(wardList);
+      // print(wardList);
 
       return wardList.map(
         (element) {

@@ -3,40 +3,57 @@ import 'dart:async';
 import 'package:untitled/core/app_export.dart';
 import 'package:untitled/model/product.dart';
 import 'package:untitled/services/product_service.dart';
+
 import '../../../model/product.dart';
-import '../../../services/Database/product_service.dart';
+
 import 'banner_list_item_model.dart';
 import 'category_list_item_model.dart';
 
 class HomeScreenModel {
-  final ProductService productService = ProductService();
+  final ProductService _productService = ProductService();
 
-  Future<List<Product>> getAllProductFirestore() async {
-    final productList = await productService.fetchAllProducts();
-    return productList;
-  }
 
-  List<BannerListItemModel> bannerList = [
+
+  List<BannerListItemModel>bannerList = [
     BannerListItemModel(image: "lib/assets/images/banner1.png"),
     BannerListItemModel(image: "lib/assets/images/banner2.png"),
   ];
+  List<Product> allProducts = [];
+  List<Product> trendingProductList = [];
+  List<Product> saleProductList = [];
+  List<Product> recommendProductList = [];
 
-  Future<List<Product>> getTrendingProductList() async {
-    return productService.getTrendingProducts();
+  bool isDataLoaded = false;
+  void setAllProducts(List<Product> list) {
+    allProducts = list;
+  }
+  void setTrendingProductList(List<Product> list) {
+    trendingProductList = list;
+  }
+  void setSaleProductList(List<Product> list) {
+    saleProductList = list;
+  }
+  void setRecommendProductList(List<Product> list) {
+    recommendProductList = list;
   }
 
-  Future<List<Product>> getSaleProductList() async {
-    return productService.getSaleProductList();
-  }
 
-  Future<List<Product>> recommendedProductList() async {
-    if (getAllProductFirestore() != null) {
-      final productList = await productService.fetchAllProducts();
-      return productList.take(6).toList();
-    }
 
-    return [];
-  }
+
+  // Future<void> loadAllData() async {
+  //   if (!isDataLoaded) {
+  //     allProducts = await _productService.fetchAllProducts();
+  //     trendingProductList = await _productService.getTrendingProducts();
+  //     saleProductList = await _productService.getSaleProductList();
+  //     recommendProductList = allProducts.take(6).toList(); // Ví dụ lấy 6 sản phẩm đầu tiên
+  //
+  //     isDataLoaded = true; // Đánh dấu là đã tải xong dữ liệu
+  //   }
+  // }
+
+
+
+
 
   List<CategoryListItemModel> categoryList = [
     CategoryListItemModel(

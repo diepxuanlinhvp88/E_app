@@ -7,10 +7,10 @@ import 'package:untitled/model/user.dart';
 import 'package:untitled/presentation/cart_screen/cart_screen.dart';
 import 'package:untitled/presentation/orders_screen/after_order.dart';
 import 'package:untitled/presentation/orders_screen/edit_info.dart';
-import 'package:untitled/services/Database/address_service/address_repository.dart';
-import 'package:untitled/services/Database/cart_service.dart';
-import 'package:untitled/services/Database/order_service.dart';
-import 'package:untitled/services/Database/user_service.dart';
+import 'package:untitled/services/address_service/address_repository.dart';
+import 'package:untitled/services/cart_service.dart';
+import 'package:untitled/services/order_service.dart';
+import 'package:untitled/services/user_service.dart';
 import 'package:untitled/widgets/custom_elevated_button.dart';
 
 import '../../model/Cart/cart_item.dart';

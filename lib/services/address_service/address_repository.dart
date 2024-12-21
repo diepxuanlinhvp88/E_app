@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled/model/address_model.dart';
-import 'package:untitled/services/Database/user_service.dart';
+import 'package:untitled/services/user_service.dart';
 
 class AddressRepository {
   final CollectionReference _addressCollection =
@@ -21,6 +21,7 @@ class AddressRepository {
     try {
       final docSnapshot = await _addressCollection.doc(id).get();
       if (docSnapshot.exists) {
+        print('lay dia chi thanh cong');
         return AddressModel.fromMap(
             docSnapshot.id, docSnapshot.data() as Map<String, dynamic>);
       } else {

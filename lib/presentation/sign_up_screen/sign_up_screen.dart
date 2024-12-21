@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled/data/models/selection_popup_model.dart';
 import 'package:untitled/model/user.dart';
-import 'package:untitled/services/Database/user_service.dart';
+import 'package:untitled/services/user_service.dart';
 import 'package:untitled/widgets/custom_drop_down.dart';
 import '../../core/app_export.dart';
 import '../../widgets/custom_elevated_button.dart';

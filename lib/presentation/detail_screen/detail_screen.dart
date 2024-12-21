@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:untitled/core/app_export.dart';
 import 'package:untitled/model/product.dart';
-import 'package:untitled/services/Database/cart_service.dart';
-import 'package:untitled/services/Database/product_service.dart';
+import 'package:untitled/presentation/orders_screen/order_screen.dart';
+import 'package:untitled/services/cart_service.dart';
 import 'package:untitled/services/product_service.dart';
 import 'package:untitled/theme/custom_text_style.dart';
 import 'package:untitled/widgets/custom_elevated_button.dart';
 import 'package:untitled/widgets/custom_rating_bar.dart';
 import 'package:untitled/widgets/product_card.dart';
+import '../../model/Cart/cart_item.dart';
 import '../../model/reviews.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({super.key, required this.product});
 
   final Product product;
-
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -25,23 +25,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool isExpandedReviews = false;
 
   late Future<List<Product>> futureRelatedProducts;
+
   // late Future<List<Product>> jsonProduct;
   late Future<List<Product>> firestoreProductList;
   late CartService cartService;
   var userId = '';
 
-
   @override
   void initState() {
     super.initState();
-
 
     // jsonProduct = ProductService().loadProductsFromJson();
     firestoreProductList = ProductService().fetchAllProducts();
     userId = AuthService().getCurrentUser()!.uid;
     // userId = 'NOlPPPEdwEhXEfi8IBGLHFOgl9k1';
     cartService = CartService();
-
   }
 
   Future<List<Product>> fetchRelatedProducts() async {
@@ -72,11 +70,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         backgroundColor: LightCodeColors().deepPurpleA200,
         elevation: 1,
         leading: IconButton(
-
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pushReplacementNamed(context, AppRoutes.homeScreen)
-        ),
-
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () =>
+                Navigator.pushReplacementNamed(context, AppRoutes.homeScreen)),
         title: Container(
           height: 40,
           decoration: BoxDecoration(
@@ -93,10 +89,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ),
         actions: [
-          IconButton(onPressed: (){
-            Navigator.pushNamed(context, AppRoutes.cartScreen);
-
-          }, icon: Icon(Icons.shopping_cart))
+          IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.cartScreen);
+              },
+              icon: Icon(Icons.shopping_cart))
         ],
       ),
       body: SingleChildScrollView(
@@ -119,7 +116,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   height: 60.h,
                   child: Row(
                     children: [
-                      SizedBox(width: 18.h,),
+                      SizedBox(
+                        width: 18.h,
+                      ),
                       Text('\$ ${widget.product.discounted_price}',
                           style: CustomTextStyles.labelLargePrimary.copyWith(
                               fontSize: 20.h,
@@ -128,10 +127,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Text(
                         '\$ ${widget.product.actual_price}',
                         style: TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.white,
-                          fontSize: 20.h
-                        ),
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.white,
+                            fontSize: 20.h),
                       ),
                       const Spacer(),
                       Container(
@@ -247,8 +245,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           child: ElevatedButton(
                         onPressed: () {
                           print(userId);
-                          cartService.addToCart(widget.product, userId, quantity);
-
+                          cartService.addToCart(
+                              widget.product, userId, quantity);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: LightCodeColors().deepPurpleA200,
@@ -263,7 +261,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Expanded(
                         child: Expanded(
                           child: CustomElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => OrderScreen(items: [
+                                            CartItem(
+                                                productId:
+                                                    widget.product.product_id,
+                                                quantity: quantity,
+                                                productName:
+                                                    widget.product.product_name,
+                                                imageUrl:
+                                                    widget.product.img_link,
+                                                price:
+                                                    widget.product.actual_price)
+                                          ])));
+                            },
                             text: 'Buy now',
                           ),
                         ),
@@ -393,8 +407,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         Column(
           children: List.generate(
-
-            isExpandedReviews ? (widget.product.reviews.length ) : (widget.product.reviews.length > 0 ? 1 : 0 ) ,
+            isExpandedReviews
+                ? (widget.product.reviews.length)
+                : (widget.product.reviews.length > 0 ? 1 : 0),
             (index) {
               final review = widget.product.reviews[index];
               return _buildReviewItem(review);

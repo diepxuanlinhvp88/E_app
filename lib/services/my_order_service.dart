@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled/model/order/orders_model.dart';
-import 'package:untitled/services/Database/order_service.dart';
+import 'package:untitled/services/order_service.dart';
 
 class MyOrderService{
   final CollectionReference ordersCollection = FirebaseFirestore.instance.collection('orders');

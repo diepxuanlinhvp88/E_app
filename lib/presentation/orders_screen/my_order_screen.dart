@@ -4,7 +4,7 @@ import 'package:untitled/core/app_export.dart';
 import '../../model/Cart/cart_item.dart';
 import '../../model/order/orders_model.dart';
 import '../../routes/app_routes.dart';
-import '../../services/Database/my_order_service.dart';
+import '../../services/my_order_service.dart';
 import '../../services/auth_service.dart';
 import '../../theme/custom_text_style.dart';
 import '../../theme/theme_helper.dart';
@@ -12,33 +12,42 @@ import '../../widgets/custom_elevated_button.dart';
 
 class MyOrderScreen extends StatelessWidget {
   MyOrderService myOrderService = MyOrderService();
-  String userId = AuthService().getCurrentUser()!.uid;
+  String userId = AuthService().getCurrentUser() == null
+      ? ''
+      : AuthService().getCurrentUser()!.uid;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: LightCodeColors().deepPurpleA200,
-        title: Text(
-          "My Order",
-          style: CustomTextStyles.titleProductBlack
-              .copyWith(color: Colors.white, fontSize: 18.h),
-        ),
-        leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.homeScreen)),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          // Order List
-          Expanded(
-            child: buildOrderList(myOrderService.getOrdersByUserId(userId)),
-          ),
-        ],
-      ),
-    );
+    return userId == ''
+        ? Scaffold(
+          body: Center(
+              child: Text('No orders'),
+            ),
+        )
+        : Scaffold(
+            appBar: AppBar(
+              backgroundColor: LightCodeColors().deepPurpleA200,
+              title: Text(
+                "My Order",
+                style: CustomTextStyles.titleProductBlack
+                    .copyWith(color: Colors.white, fontSize: 18.h),
+              ),
+              leading: IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.homeScreen)),
+              centerTitle: true,
+            ),
+            body: Column(
+              children: [
+                // Order List
+                Expanded(
+                  child:
+                      buildOrderList(myOrderService.getOrdersByUserId(userId)),
+                ),
+              ],
+            ),
+          );
   }
 
   Widget buildOrderList(Future<List<OrdersModel>> futureOrders) {

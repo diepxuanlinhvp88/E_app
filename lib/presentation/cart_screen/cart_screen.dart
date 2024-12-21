@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:untitled/core/app_export.dart';
 import 'package:untitled/presentation/orders_screen/order_screen.dart';
-import 'package:untitled/services/Database/cart_service.dart';
+import 'package:untitled/services/cart_service.dart';
 import 'package:untitled/widgets/custom_elevated_button.dart';
 
 import '../../model/Cart/cart_item.dart';

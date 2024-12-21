@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:untitled/presentation/detail_screen/detail_screen.dart';
 import 'package:untitled/presentation/home_screen/models/banner_list_item_model.dart';
 import 'package:untitled/presentation/home_screen/models/home_screen_model.dart';
+import 'package:untitled/presentation/home_screen/search_screen.dart';
 import '../../core/app_export.dart';
 import '../../model/product.dart';
 import '../../widgets/custom_text_form_field.dart';
@@ -23,10 +24,11 @@ class HomeScreen extends StatefulWidget {
   HomeScreenState createState() => HomeScreenState();
 
   static Widget builder(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => HomeScreenProvider(),
-      child: const HomeScreen(),
-    );
+    return HomeScreen();
+    // return ChangeNotifierProvider(
+    //   create: (context) => HomeScreenProvider(),
+    //   child: const HomeScreen(),
+    // );
   }
 }
 
@@ -34,6 +36,9 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    final provider = context.read<HomeScreenProvider>();
+    provider.loadAllData();
+    provider.loadRecommendProductList();
   }
 
   @override
@@ -74,9 +79,9 @@ class HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 145.h),
+                  SizedBox(height: 150.h),
                   _buildBannerSection(context),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 24.h),
                   Container(
                     width: double.maxFinite,
                     padding: EdgeInsets.only(top: 16.h, bottom: 36.h),
@@ -94,7 +99,6 @@ class HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 32.h),
                   _buildCategorySliderSection(context),
-                  // SizedBox(height: 22.h),
                   Padding(
                     padding: EdgeInsets.only(left: 16.h),
                     child: Text(
@@ -107,13 +111,11 @@ class HomeScreenState extends State<HomeScreen> {
                   Container(
                     width: double.maxFinite,
                     padding:
-                        EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.h),
+                    EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.h),
                     decoration: BoxDecoration(
                       color: appTheme.blueGray100.withOpacity(0.38),
                     ),
-                    child: Column(
-                      children: [_buildRecommendedProductGrid(context)],
-                    ),
+                    child: _buildRecommendedProductGrid(context),
                   )
                 ],
               ),
@@ -127,74 +129,19 @@ class HomeScreenState extends State<HomeScreen> {
       child: Selector<HomeScreenProvider, TextEditingController?>(
         selector: (context, provider) => provider.searchController,
         builder: (context, searchController, child) {
-          return Column(
-            children: [
-              CustomTextFormField(
-                hintText: "Search",
-                contentPadding:
-                EdgeInsets.symmetric(horizontal: 12.h, vertical: 6.h),
-                controller: searchController,
-                onTap: () {
-                  // Clear search query
-                  searchController?.clear();
-                },
-
-
-                // onChanged: (value) {
-                //   // Trigger provider to filter suggestions
-                //   context.read<HomeScreenProvider>().filterSuggestions(value);
-                // },
-              ),
-              // Display suggestions
-              Consumer<HomeScreenProvider>(
-                builder: (context, provider, child) {
-                  if (provider.filteredSuggestions.isEmpty) {
-                    return const SizedBox(); // No suggestions
-                  }
-                  return Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.h),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.h),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: provider.filteredSuggestions.length,
-                      itemBuilder: (context, index) {
-                        final suggestion = provider.filteredSuggestions[index];
-                        return ListTile(
-                          title: Text(suggestion.product_name), // Product name
-                          onTap: () {
-                            // Navigate to product detail or perform search
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ProductDetailScreen(product: suggestion),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ],
+          return CustomTextFormField(
+            hintText: "Search",
+            contentPadding:
+            EdgeInsets.symmetric(horizontal: 12.h, vertical: 6.h),
+            controller: searchController,
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SearchScreen()));
+            },
           );
         },
       ),
     );
   }
-
 
   Widget _buildBannerSection(BuildContext context) {
     return Consumer<HomeScreenProvider>(
@@ -239,48 +186,44 @@ class HomeScreenState extends State<HomeScreen> {
             style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
           ),
           SizedBox(height: 6.h),
-          Container(
-            width: double.maxFinite,
-            child: FutureBuilder<List<Product>>(
-              future: HomeScreenModel().getTrendingProductList(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                      child: Text('No products available')); // Không có dữ liệu
-                }
-                final items = snapshot.data!;
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Wrap(
-                    direction: Axis.horizontal,
-                    spacing: 6.h,
-                    children: List.generate(items.length, (index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ProductDetailScreen(product: items[index]),
+
+          Consumer<HomeScreenProvider>(
+            builder: (context, homeProvider, child) {
+              final items = homeProvider.homeScreenModel.trendingProductList;
+
+              if (items.isEmpty) {
+                return Center(child: Text('No products available'));
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Wrap(
+                  direction: Axis.horizontal,
+                  spacing: 6.h,
+                  children: List.generate(items.length, (index) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductDetailScreen(
+                              product: items[index],
                             ),
-                          );
-                        },
-                        child: ProductSliderListItemWidget(items[index]),
-                      );
-                    }),
-                  ),
-                );
-              },
-            ),
+                          ),
+                        );
+                      },
+                      child: ProductSliderListItemWidget(items[index]),
+                    );
+                  }),
+                ),
+              );
+            },
           ),
         ],
       ),
     );
   }
+
+
 
   Widget _buildSaleSection(BuildContext context) {
     return Container(
@@ -294,48 +237,43 @@ class HomeScreenState extends State<HomeScreen> {
             style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
           ),
           SizedBox(height: 6.h),
-          Container(
-            width: double.maxFinite,
-            child: FutureBuilder<List<Product>>(
-              future: HomeScreenModel().getSaleProductList(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                      child: Text('No products available')); // Không có dữ liệu
-                }
-                final items = snapshot.data!;
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Wrap(
-                    direction: Axis.horizontal,
-                    spacing: 6.h,
-                    children: List.generate(items.length, (index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ProductDetailScreen(product: items[index]),
+          // Lắng nghe sự thay đổi của saleProductList từ HomeScreenProvider
+          Consumer<HomeScreenProvider>(
+            builder: (context, homeProvider, child) {
+              final items = homeProvider.homeScreenModel.saleProductList;
+              // Kiểm tra nếu không có sản phẩm trong saleProductList
+              if (items.isEmpty) {
+                return Center(child: Text('No products available'));
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Wrap(
+                  direction: Axis.horizontal,
+                  spacing: 6.h,
+                  children: List.generate(items.length, (index) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductDetailScreen(
+                              product: items[index],
                             ),
-                          );
-                        },
-                        child: ProductSliderListItemWidget(items[index]),
-                      );
-                    }),
-                  ),
-                );
-              },
-            ),
+                          ),
+                        );
+                      },
+                      child: ProductSliderListItemWidget(items[index]),
+                    );
+                  }),
+                ),
+              );
+            },
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildCategorySliderSection(BuildContext context) {
     return Padding(
@@ -367,45 +305,42 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRecommendedProductGrid(BuildContext context) {
-    return FutureBuilder<List<Product>>(
-      future: HomeScreenModel().recommendedProductList(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+    return Consumer<HomeScreenProvider>(
+      builder: (context, homeProvider, child) {
+        final relatedProducts = homeProvider.homeScreenModel.recommendProductList;
+
+
+        if (relatedProducts.isEmpty) {
           return Center(child: Text('No related products found.'));
-        } else {
-          final relatedProducts = snapshot.data!;
-          return GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 6,
-            itemBuilder: (context, index) {
-              final product = relatedProducts[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ProductDetailScreen(product: product),
-                    ),
-                  );
-                },
-                child: ProductCard(product),
-              );
-            },
-          );
         }
+
+        return GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: 6, // Hiển thị tối đa 6 sản phẩm
+          itemBuilder: (context, index) {
+            final product = relatedProducts[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProductDetailScreen(product: product),
+                  ),
+                );
+              },
+              child: ProductCard(product),
+            );
+          },
+        );
       },
     );
   }
+
 }

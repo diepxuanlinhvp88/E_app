@@ -6,7 +6,6 @@ import 'package:untitled/model/order/orders_model.dart';
 import 'package:untitled/model/product.dart';
 import 'package:untitled/presentation/detail_screen/detail_screen.dart';
 import 'package:untitled/presentation/profile_screen/profile_screen.dart';
-import 'package:untitled/presentation/search_screen.dart';
 import '../presentation/cart_screen/cart_screen.dart';
 import '../presentation/menu_screen/menu_screen.dart';
 import '../presentation/orders_screen/order_screen.dart';
@@ -52,6 +51,6 @@ class AppRoutes {
     forgotPasswordScreen: (context) => ForgotPasswordScreen(),
     cartScreen: (context) => CartScreen(),
     profileScreen: (context) => ProfileScreen(),
-    menuScreen : (context) => SearchScreen(),
+
   };
 }
